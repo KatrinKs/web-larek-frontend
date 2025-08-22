@@ -1,5 +1,5 @@
 export function pascalToKebab(value: string): string {
-    return value.replace(/([a-z0–9])([A-Z])/g, "$1-$2").toLowerCase();
+    return value.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
 }
 
 export function isSelector(x: any): x is string {
@@ -44,8 +44,14 @@ export function ensureElement<T extends HTMLElement>(selectorElement: SelectorEl
     throw new Error('Unknown selector element');
 }
 
-export function cloneTemplate<T extends HTMLElement>(query: string | HTMLTemplateElement): T {
-    const template = ensureElement(query) as HTMLTemplateElement;
+export function cloneTemplate<T extends HTMLElement>(selector: string): T {
+    const template = document.querySelector(selector) as HTMLTemplateElement;
+    if (!template) {
+        throw new Error(`Шаблон ${selector} не найден`);
+    }
+    if (!template.content || !template.content.firstElementChild) {
+        throw new Error(`Шаблон ${selector} пустой или некорректный`);
+    }
     return template.content.firstElementChild.cloneNode(true) as T;
 }
 
@@ -69,32 +75,25 @@ export function getObjectProperties(obj: object, filter?: (name: string, prop: P
         .map(([name, prop]) => name);
 }
 
-/**
- * Устанавливает dataset атрибуты элемента
- */
 export function setElementData<T extends Record<string, unknown> | object>(el: HTMLElement, data: T) {
     for (const key in data) {
         el.dataset[key] = String(data[key]);
     }
 }
 
-/**
- * Получает типизированные данные из dataset атрибутов элемента
- */
 export function getElementData<T extends Record<string, unknown>>(el: HTMLElement, scheme: Record<string, Function>): T {
     const data: Partial<T> = {};
     for (const key in el.dataset) {
-        data[key as keyof T] = scheme[key](el.dataset[key]);
+        if (scheme[key]) {
+            data[key as keyof T] = scheme[key](el.dataset[key]);
+        }
     }
     return data as T;
 }
 
-/**
- * Проверка на простой объект
- */
 export function isPlainObject(obj: unknown): obj is object {
     const prototype = Object.getPrototypeOf(obj);
-    return  prototype === Object.getPrototypeOf({}) ||
+    return prototype === Object.getPrototypeOf({}) ||
         prototype === null;
 }
 
@@ -102,11 +101,6 @@ export function isBoolean(v: unknown): v is boolean {
     return typeof v === 'boolean';
 }
 
-/**
- * Фабрика DOM-элементов в простейшей реализации
- * здесь не учтено много факторов
- * в интернет можно найти более полные реализации
- */
 export function createElement<
     T extends HTMLElement
     >(
@@ -132,4 +126,30 @@ export function createElement<
         }
     }
     return element;
+}
+
+export function formatPrice(price: number | null): string {
+    if (price === null) return 'Бесценно';
+    return `${price} синапсов`;
+}
+
+export function validateEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+export function validatePhone(phone: string): boolean {
+    const phoneRegex = /^(\+7|8)[\s-]?\(?\d{3}\)?[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}$/;
+    return phoneRegex.test(phone);
+}
+
+export function debounce<T extends (...args: any[]) => void>(
+    func: T,
+    delay: number
+): (...args: Parameters<T>) => void {
+    let timeoutId: NodeJS.Timeout;
+    return (...args: Parameters<T>) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(null, args), delay);
+    };
 }
