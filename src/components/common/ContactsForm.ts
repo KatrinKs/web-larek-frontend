@@ -1,26 +1,24 @@
-import { Component } from '../base/Component';
+import { Form } from './Form';
 import { EventEmitter } from '../base/events';
 import { ensureElement, cloneTemplate } from '../../utils/utils';
 import { IContactsForm, FormErrors } from '../../types';
 
 export interface IContactsFormView extends IContactsForm {
     valid: boolean;
-    errors: FormErrors;
+    errors: string;
 }
 
-export class ContactsForm extends Component<IContactsFormView> {
+export class ContactsForm extends Form<IContactsForm> {
     protected _email: HTMLInputElement;
     protected _phone: HTMLInputElement;
-    protected _errors: HTMLElement;
     protected events: EventEmitter;
 
     constructor(events: EventEmitter) {
-        super(cloneTemplate<HTMLFormElement>('#contacts'));
+        super(cloneTemplate<HTMLFormElement>('#contacts'), events);
         this.events = events;
 
         this._email = ensureElement<HTMLInputElement>('input[name="email"]', this.container);
         this._phone = ensureElement<HTMLInputElement>('input[name="phone"]', this.container);
-        this._errors = ensureElement<HTMLElement>('.form__errors', this.container);
 
         this._email.addEventListener('input', () => {
             this.events.emit('contacts.email:change', { field: 'email', value: this._email.value });
@@ -28,11 +26,6 @@ export class ContactsForm extends Component<IContactsFormView> {
 
         this._phone.addEventListener('input', () => {
             this.events.emit('contacts.phone:change', { field: 'phone', value: this._phone.value });
-        });
-
-        this.container.addEventListener('submit', (e: Event) => {
-            e.preventDefault();
-            this.events.emit('contacts:submit');
         });
     }
 
@@ -44,12 +37,8 @@ export class ContactsForm extends Component<IContactsFormView> {
         this._phone.value = value;
     }
 
-    set valid(value: boolean) {
-        this.setDisabled(ensureElement<HTMLButtonElement>('button[type="submit"]', this.container), !value);
-    }
-
-    set errors(value: FormErrors) {
+    setFormErrors(value: FormErrors) {
         const errors = Object.values(value).filter(i => !!i).join('; ');
-        this.setText(this._errors, errors);
+        this.errors = errors;
     }
 }

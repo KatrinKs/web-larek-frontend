@@ -1,6 +1,6 @@
-import {Component} from "../base/Component";
-import {IEvents} from "../base/events";
-import {ensureElement} from "../../utils/utils";
+import { Component } from "../base/Component";
+import { IEvents } from "../base/events";
+import { ensureElement } from "../../utils/utils";
 
 interface IFormState {
     valid: boolean;
@@ -38,7 +38,7 @@ export class Form<T> extends Component<IFormState> {
     }
 
     set valid(value: boolean) {
-        this._submit.disabled = !value;
+        this.setDisabled(this._submit, !value);
     }
 
     set errors(value: string) {
@@ -46,10 +46,9 @@ export class Form<T> extends Component<IFormState> {
     }
 
     render(state: Partial<T> & IFormState) {
-        const {valid, errors, ...inputs} = state;
+        const {valid = false, errors = '', ...inputs} = state;
         super.render({valid, errors});
         Object.assign(this, inputs);
         return this.container;
-
     }
 }

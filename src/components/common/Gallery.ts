@@ -24,7 +24,10 @@ export class Gallery extends Component<IGallery> {
         console.log('Обновление галереи:', items);
         
         if (items.length === 0) {
-            this.container.innerHTML = '<p>Товары не найдены</p>';
+            this.setText(this.container, '');
+            const notFound = document.createElement('p');
+            notFound.textContent = 'Товары не найдены';
+            this.container.appendChild(notFound);
             return;
         }
 

@@ -1,5 +1,6 @@
 import {EventEmitter} from "./events";
 import {bem, ensureElement, getObjectProperties, isEmpty, pascalToKebab} from "../../utils/utils";
+import { Component } from './Component';
 
 export type EventData = {
     event: Event,
@@ -9,7 +10,7 @@ export type EventData = {
 export type EventHandler = (args: EventData) => void;
 export type PartialElement = HTMLElement | Partial<any, any, any, any>;
 
-export class Partial<NodeType extends HTMLElement, DataType extends object, Events extends string, Modifiers> {
+export class Partial<NodeType extends HTMLElement, DataType extends object, Events extends string, Modifiers> extends Component<DataType> {
     readonly name: string;
     protected node: NodeType;
     protected elements: Record<string, PartialElement>;
@@ -17,6 +18,7 @@ export class Partial<NodeType extends HTMLElement, DataType extends object, Even
     readonly fieldNames: string[];
 
     constructor(root: NodeType, name?: string) {
+        super(root);
         this.node = root;
         this.name = name ?? pascalToKebab(this.constructor.name);
         this.fieldNames = getObjectProperties(this, (name, prop) => !!(prop.get || prop.set));
@@ -76,7 +78,6 @@ export class Partial<NodeType extends HTMLElement, DataType extends object, Even
 
     bindEvent(sourceEvent: string, targetEvent?: string, data?: object) {
         this.node.addEventListener(sourceEvent, (event: Event) => {
-            debugger;
             this.events.emit((targetEvent ?? sourceEvent) as Events, {
                 event,
                 element: this
@@ -99,7 +100,7 @@ export class Partial<NodeType extends HTMLElement, DataType extends object, Even
     }
 
     toggle(modifier: Modifiers) {
-        this.toggleClass(`.${this.name}_${modifier}`);
+        super.toggleClass(this.node, `${this.name}_${modifier}`);
         return this;
     }
 
@@ -122,9 +123,9 @@ export class Partial<NodeType extends HTMLElement, DataType extends object, Even
     text(value: string) {
         if (!isEmpty(value)) {
             if (this.node instanceof HTMLImageElement) {
-                this.node.alt = value;
+                super.setImage(this.node as HTMLImageElement, '', value);
             } else {
-                this.node.textContent = value;
+                super.setText(this.node, value);
             }
         }
         return this;
@@ -133,7 +134,7 @@ export class Partial<NodeType extends HTMLElement, DataType extends object, Even
     link(value: string) {
         if (!isEmpty(value)) {
             if (this.node instanceof HTMLImageElement) {
-                this.node.src = value;
+                super.setImage(this.node as HTMLImageElement, value);
             }
             if (this.node instanceof HTMLAnchorElement) {
                 this.node.href = value;
@@ -144,11 +145,6 @@ export class Partial<NodeType extends HTMLElement, DataType extends object, Even
 
     setContent(item?: PartialElement) {
         return this.append(item);
-    }
-
-    toggleClass(className: string) {
-        this.node.classList.toggle(className);
-        return this;
     }
 
     addClass(className: string) {

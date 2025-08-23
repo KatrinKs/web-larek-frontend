@@ -1,5 +1,6 @@
 import { EventEmitter } from '../base/events';
 import { IProduct, IOrder, FormErrors } from '../../types';
+import { validateEmail, validatePhone } from '../../utils/utils';
 
 export class AppData {
     catalog: IProduct[] = [];
@@ -81,12 +82,19 @@ export class AppData {
 
     validateContacts(): boolean {
         const errors: FormErrors = {};
+        
         if (!this.order.email) {
             errors.email = 'Необходимо указать email';
+        } else if (!validateEmail(this.order.email)) {
+            errors.email = 'Некорректный формат email';
         }
+        
         if (!this.order.phone) {
             errors.phone = 'Необходимо указать телефон';
+        } else if (!validatePhone(this.order.phone)) {
+            errors.phone = 'Некорректный формат телефона';
         }
+        
         this.events.emit('contactsErrors:change', errors);
         return Object.keys(errors).length === 0;
     }

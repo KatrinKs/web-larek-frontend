@@ -13,6 +13,7 @@ export interface ICard {
     category?: string;
     price?: number | null;
     selected?: boolean;
+    index?: number;
 }
 
 export class Card extends Component<ICard> {
@@ -22,6 +23,7 @@ export class Card extends Component<ICard> {
     protected _button?: HTMLButtonElement;
     protected _price?: HTMLElement;
     protected _category?: HTMLElement;
+    protected _index?: HTMLElement;
 
     constructor(protected blockName: string, container: HTMLElement, actions?: ICardActions) {
         super(container);
@@ -32,6 +34,7 @@ export class Card extends Component<ICard> {
         this._description = container.querySelector(`.${blockName}__text`);
         this._price = container.querySelector(`.${blockName}__price`);
         this._category = container.querySelector(`.${blockName}__category`);
+        this._index = container.querySelector(`.${blockName}__index`);
 
         if (actions?.onClick) {
             if (this._button) {
@@ -60,26 +63,31 @@ export class Card extends Component<ICard> {
         }
     }
 
+    set index(value: number) {
+        if (this._index) {
+            this.setText(this._index, String(value));
+        }
+    }
+
     set price(value: number | null) {
         if (value === null) {
             this.setText(this._price, 'Бесценно');
-            if (this._button) {
-                this.setDisabled(this._button, true);
-                this.setText(this._button, 'Недоступно');
-            }
+            this.toggleButton(true);
+            this.setText(this._button, 'Недоступно');
         } else {
             this.setText(this._price, `${value} ${settings.currency}`);
-            if (this._button) {
-                this.setDisabled(this._button, false);
-            }
+            this.toggleButton(false);
         }
     }
 
     set category(value: string) {
         if (this._category) {
             this.setText(this._category, value);
-            const categoryClass = settings.categoryClasses[value as keyof typeof settings.categoryClasses] || '';
-            this._category.className = `${this.blockName}__category ${categoryClass}`;
+            this._category.className = `${this.blockName}__category`;
+            const categoryClass = settings.categoryClasses[value as keyof typeof settings.categoryClasses];
+            if (categoryClass) {
+                this.toggleClass(this._category, categoryClass, true);
+            }
         }
     }
 
@@ -87,11 +95,17 @@ export class Card extends Component<ICard> {
         if (this._button) {
             if (value) {
                 this.setText(this._button, 'Убрать из корзины');
-                this._button.classList.add('card__button_selected');
+                this.toggleClass(this._button, 'card__button_selected', true);
             } else {
                 this.setText(this._button, 'Купить');
-                this._button.classList.remove('card__button_selected');
+                this.toggleClass(this._button, 'card__button_selected', false);
             }
+        }
+    }
+
+    toggleButton(state: boolean) {
+        if (this._button) {
+            this.setDisabled(this._button, state);
         }
     }
 }
