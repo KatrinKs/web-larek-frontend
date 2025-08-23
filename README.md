@@ -1,19 +1,8 @@
 # Проектная работа "Веб-ларек"
 
-Стек: HTML, SCSS, TS, Webpack
+## Описание проекта
 
-Структура проекта:
-- src/ — исходные файлы проекта
-- src/components/ — папка с JS компонентами
-- src/components/base/ — папка с базовым кодом
-
-Важные файлы:
-- src/pages/index.html — HTML-файл главной страницы
-- src/types/index.ts — файл с типами
-- src/index.ts — точка входа приложения
-- src/scss/styles.scss — корневой файл стилей
-- src/utils/constants.ts — файл с константами
-- src/utils/utils.ts — файл с утилитами
+Web-ларёк - это интернет-магазин товаров для веб-разработчиков. Приложение позволяет просматривать каталог товаров, добавлять товары в корзину и оформлять заказы.
 
 ## Установка и запуск
 Для установки и запуска проекта необходимо выполнить команды
@@ -41,9 +30,20 @@ npm run build
 yarn build
 ```
 
-## Описание проекта
+Стек: HTML, SCSS, TS, Webpack
 
-Web-ларёк - это интернет-магазин товаров для веб-разработчиков. Приложение позволяет просматривать каталог товаров, добавлять товары в корзину и оформлять заказы.
+Структура проекта:
+- src/ — исходные файлы проекта
+- src/components/ — папка с JS компонентами
+- src/components/base/ — папка с базовым кодом
+
+Важные файлы:
+- src/pages/index.html — HTML-файл главной страницы
+- src/types/index.ts — файл с типами
+- src/index.ts — точка входа приложения
+- src/scss/styles.scss — корневой файл стилей
+- src/utils/constants.ts — файл с константами
+- src/utils/utils.ts — файл с утилитами
 
 ## Архитектура проекта
 
@@ -98,6 +98,38 @@ constructor(protected events: EventEmitter)
     validateContacts(): boolean - валидация контактных данных
 
     isInBasket(item: IProduct): boolean - проверка наличия товара в корзине
+
+## Класс Api
+
+Назначение: Базовый HTTP клиент для работы с API сервером.
+
+Конструктор:
+
+```typescript
+constructor(baseUrl: string, options: RequestInit = {})
+```
+
+Принимает базовый URL API и опции для HTTP запросов.
+
+Типы:
+
+    ApiListResponse<Type> - типизированный ответ API со списком элементов
+
+    ApiPostMethods - поддерживаемые HTTP методы для запросов с телом
+
+Поля:
+
+    baseUrl: string - базовый URL API
+
+    options: RequestInit - опции HTTP запросов
+
+Методы:
+
+    get(uri: string) - выполнение GET запроса
+
+    post(uri: string, data: object, method: ApiPostMethods = 'POST') - выполнение POST/PUT/DELETE запроса
+
+    protected handleResponse(response: Response) - обработка HTTP ответов
 
 ## Слой Представления (View)
 Базовый класс Component<T>
