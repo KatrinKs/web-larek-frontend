@@ -389,6 +389,7 @@ type FormErrors = Partial<Record<keyof IOrder, string>>;
         Открывает модальное окно с формой
 
     View (OrderForm): Пользователь заполняет данные
+
         Изменения полей генерируют события: order.payment:change, order.address:change
 
     Presenter: Обрабатывает события полей
@@ -416,8 +417,6 @@ type FormErrors = Partial<Record<keyof IOrder, string>>;
 
     contacts:submit - отправка контактных данных
 
-    modal:open, modal:close - упра
-
-    вление модальными окнами
+    modal:open, modal:close - управление модальными окнами
 
     success:close - закрытие окна успеха
