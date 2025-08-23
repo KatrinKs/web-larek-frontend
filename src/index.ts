@@ -10,7 +10,7 @@ import { ContactsForm } from './components/common/ContactsForm';
 import { Success } from './components/common/Success';
 import { Card } from './components/common/Card';
 import { IProduct, IOrderResult, FormErrors } from './types';
-import { API_URL, CDN_URL } from './utils/constants';
+import { API_URL, CDN_URL, AppEvents } from './utils/constants';
 import { ensureElement, cloneTemplate } from './utils/utils';
 import './scss/styles.scss';
 
@@ -26,47 +26,24 @@ const orderForm = new OrderForm(events);
 const contactsForm = new ContactsForm(events);
 const success = new Success(events);
 
-
 api.getProducts()
     .then((products: IProduct[]) => {
         appData.setCatalog(products);
     })
     .catch(err => {
         console.error('Ошибка загрузки товаров:', err);
-        const mockProducts: IProduct[] = [
-            {
-                id: '1',
-                title: 'Фреймворк куки судьбы',
-                price: 2500,
-                description: 'Мощный фреймворк для предсказания будущего',
-                image: `${CDN_URL}/images/framework.jpg`,
-                category: 'софт-скил'
-            },
-            {
-                id: '2', 
-                title: '+1 час в сутках',
-                price: 750,
-                description: 'Дополнительный час для coding marathon',
-                image: `${CDN_URL}/images/time.jpg`,
-                category: 'другое'
-            },
-            {
-                id: '3',
-                title: 'Бесплатный товар',
-                price: null,
-                description: 'Тестовый бесплатный товар',
-                image: `${CDN_URL}/images/free.jpg`,
-                category: 'другое'
-            }
-        ];
-        appData.setCatalog(mockProducts);
+        gallery.update([]);
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'error-message';
+        errorMessage.textContent = 'Не удалось загрузить товары. Пожалуйста, попробуйте позже.';
+        document.querySelector('.gallery')?.appendChild(errorMessage);
     });
 
-events.on('catalog:changed', () => {
+events.on(AppEvents.CATALOG_CHANGED, () => {
     gallery.update(appData.catalog);
 });
 
-events.on('basket:changed', () => {
+events.on(AppEvents.BASKET_CHANGED, () => {
     page.counter = appData.basket.length;
     const items = appData.basket.map((id, index) => {
         const item = appData.catalog.find(it => it.id === id);
@@ -76,21 +53,15 @@ events.on('basket:changed', () => {
         const card = new Card('card', cardElement, {
             onClick: () => {
                 appData.removeFromBasket(id);
-                events.emit('basket:changed');
+                events.emit(AppEvents.BASKET_CHANGED);
             }
         });
         
-        const basketItem = card.render({
+        return card.render({
             title: item.title,
-            price: item.price
+            price: item.price,
+            index: index + 1 
         });
-        
-        const indexElement = basketItem.querySelector('.basket__item-index');
-        if (indexElement) {
-            indexElement.textContent = String(index + 1);
-        }
-        
-        return basketItem;
     }).filter(Boolean) as HTMLElement[];
     
     basket.items = items;
@@ -98,11 +69,11 @@ events.on('basket:changed', () => {
     basket.selected = appData.basket.length > 0 && appData.getTotal() > 0;
 });
 
-events.on('card:select', (item: IProduct) => {
+events.on(AppEvents.CARD_SELECT, (item: IProduct) => {
     appData.setPreview(item);
 });
 
-events.on('preview:changed', (item: IProduct) => {
+events.on(AppEvents.PREVIEW_CHANGED, (item: IProduct) => {
     const cardElement = cloneTemplate<HTMLElement>('#card-preview');
     const card = new Card('card', cardElement, {
         onClick: () => {
@@ -128,60 +99,60 @@ events.on('preview:changed', (item: IProduct) => {
     modal.open();
 });
 
-events.on('basket:open', () => {
-    events.emit('basket:changed');
+events.on(AppEvents.BASKET_OPEN, () => {
+    events.emit(AppEvents.BASKET_CHANGED);
     modal.content = basket.render();
     modal.open();
 });
 
-events.on('order:ready', () => {
+events.on(AppEvents.ORDER_READY, () => {
     modal.content = orderForm.render({
         payment: appData.order.payment,
         address: appData.order.address,
         valid: appData.validateOrder(),
-        errors: {}
+        errors: '' 
     });
     modal.open();
 });
 
-events.on('order.payment:change', (data: { field: string, value: string }) => {
+events.on(AppEvents.ORDER_PAYMENT_CHANGE, (data: { field: string, value: string }) => {
     appData.setOrderField('payment', data.value);
 });
 
-events.on('order.address:change', (data: { field: string, value: string }) => {
+events.on(AppEvents.ORDER_ADDRESS_CHANGE, (data: { field: string, value: string }) => {
     appData.setOrderField('address', data.value);
 });
 
-events.on('orderErrors:change', (errors: FormErrors) => {
+events.on(AppEvents.ORDER_ERRORS_CHANGE, (errors: FormErrors) => {
     orderForm.valid = Object.keys(errors).length === 0;
-    orderForm.errors = errors;
+    orderForm.setFormErrors(errors);
 });
 
-events.on('order:submit', () => {
+events.on(AppEvents.ORDER_SUBMIT, () => {
     if (appData.validateOrder()) {
         modal.content = contactsForm.render({
             email: appData.order.email,
             phone: appData.order.phone,
             valid: appData.validateContacts(),
-            errors: {}
+            errors: '' 
         });
     }
 });
 
-events.on('contacts.email:change', (data: { field: string, value: string }) => {
+events.on(AppEvents.CONTACTS_EMAIL_CHANGE, (data: { field: string, value: string }) => {
     appData.setOrderField('email', data.value);
 });
 
-events.on('contacts.phone:change', (data: { field: string, value: string }) => {
+events.on(AppEvents.CONTACTS_PHONE_CHANGE, (data: { field: string, value: string }) => {
     appData.setOrderField('phone', data.value);
 });
 
-events.on('contactsErrors:change', (errors: FormErrors) => {
+events.on(AppEvents.CONTACTS_ERRORS_CHANGE, (errors: FormErrors) => {
     contactsForm.valid = Object.keys(errors).length === 0;
-    contactsForm.errors = errors;
+    contactsForm.setFormErrors(errors);
 });
 
-events.on('contacts:submit', () => {
+events.on(AppEvents.CONTACTS_SUBMIT, () => {
     if (appData.validateContacts()) {
         appData.order.items = appData.basket;
         appData.order.total = appData.getTotal();
@@ -199,14 +170,14 @@ events.on('contacts:submit', () => {
     }
 });
 
-events.on('success:close', () => {
+events.on(AppEvents.SUCCESS_CLOSE, () => {
     modal.close();
 });
 
-events.on('modal:open', () => {
+events.on(AppEvents.MODAL_OPEN, () => {
     page.locked = true;
 });
 
-events.on('modal:close', () => {
+events.on(AppEvents.MODAL_CLOSE, () => {
     page.locked = false;
 });

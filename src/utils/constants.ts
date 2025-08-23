@@ -15,3 +15,23 @@ export const settings = {
         'хард-скил': 'card__category_hard',
     }
 };
+
+export enum AppEvents {
+  CATALOG_CHANGED = 'catalog:changed',
+  BASKET_CHANGED = 'basket:changed',
+  CARD_SELECT = 'card:select',
+  PREVIEW_CHANGED = 'preview:changed',
+  BASKET_OPEN = 'basket:open',
+  ORDER_READY = 'order:ready',
+  ORDER_PAYMENT_CHANGE = 'order.payment:change',
+  ORDER_ADDRESS_CHANGE = 'order.address:change',
+  ORDER_ERRORS_CHANGE = 'orderErrors:change',
+  ORDER_SUBMIT = 'order:submit',
+  CONTACTS_EMAIL_CHANGE = 'contacts.email:change',
+  CONTACTS_PHONE_CHANGE = 'contacts.phone:change',
+  CONTACTS_ERRORS_CHANGE = 'contactsErrors:change',
+  CONTACTS_SUBMIT = 'contacts:submit',
+  SUCCESS_CLOSE = 'success:close',
+  MODAL_OPEN = 'modal:open',
+  MODAL_CLOSE = 'modal:close'
+}
