@@ -148,12 +148,12 @@ export class Partial<NodeType extends HTMLElement, DataType extends object, Even
     }
 
     addClass(className: string) {
-        this.node.classList.add(className);
+        this.toggleClass(this.node, className, true);
         return this;
     }
 
     removeClass(className: string) {
-        this.node.classList.remove(className);
+        this.toggleClass(this.node, className, false);
         return this;
     }
 

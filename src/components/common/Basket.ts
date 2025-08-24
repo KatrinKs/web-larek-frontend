@@ -34,7 +34,7 @@ export class Basket extends Component<IBasketView> {
             this.setText(this._list, '');
             const emptyMessage = document.createElement('p');
             emptyMessage.className = 'basket__empty';
-            emptyMessage.textContent = 'Корзина пуста';
+            this.setText(emptyMessage, 'Корзина пуста');
             this._list.appendChild(emptyMessage);
         } else {
             this._list.replaceChildren(...items);

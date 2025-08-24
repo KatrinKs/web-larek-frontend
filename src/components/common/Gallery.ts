@@ -26,7 +26,7 @@ export class Gallery extends Component<IGallery> {
         if (items.length === 0) {
             this.setText(this.container, '');
             const notFound = document.createElement('p');
-            notFound.textContent = 'Товары не найдены';
+            this.setText(notFound, 'Товары не найдены');
             this.container.appendChild(notFound);
             return;
         }
@@ -49,6 +49,14 @@ export class Gallery extends Component<IGallery> {
         this.container.innerHTML = '';
         this.container.append(...this._cards);
     }
+
+    showError(message: string) {
+    this.setText(this.container, '');
+    const errorElement = document.createElement('p');
+    errorElement.className = 'gallery__error';
+    this.setText(errorElement, message);
+    this.container.appendChild(errorElement);
+}
 
     render(data?: Partial<IGallery>): HTMLElement {
         if (data && data.items) {

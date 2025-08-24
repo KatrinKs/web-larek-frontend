@@ -35,7 +35,7 @@ api.getProducts()
         gallery.update([]);
         const errorMessage = document.createElement('div');
         errorMessage.className = 'error-message';
-        errorMessage.textContent = 'Не удалось загрузить товары. Пожалуйста, попробуйте позже.';
+        gallery.showError('Не удалось загрузить товары. Пожалуйста, попробуйте позже.');
         document.querySelector('.gallery')?.appendChild(errorMessage);
     });
 
@@ -45,22 +45,25 @@ events.on(AppEvents.CATALOG_CHANGED, () => {
 
 events.on(AppEvents.BASKET_CHANGED, () => {
     page.counter = appData.basket.length;
-    const items = appData.basket.map((id, index) => {
-        const item = appData.catalog.find(it => it.id === id);
-        if (!item) return null;
-        
+    
+    const basketItems = appData.basket.map(id => {
+        return appData.catalog.find(item => item.id === id);
+    }).filter(Boolean) as IProduct[];
+    
+    const items = basketItems.map((item, index) => {
         const cardElement = cloneTemplate<HTMLElement>('#card-basket');
         const card = new Card('card', cardElement, {
             onClick: () => {
-                appData.removeFromBasket(id);
+                appData.removeFromBasket(item.id);
                 events.emit(AppEvents.BASKET_CHANGED);
             }
         });
         
+        card.index = index + 1;
+        
         return card.render({
             title: item.title,
-            price: item.price,
-            index: index + 1 
+            price: item.price
         });
     }).filter(Boolean) as HTMLElement[];
     

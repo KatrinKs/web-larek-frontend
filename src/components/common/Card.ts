@@ -34,7 +34,7 @@ export class Card extends Component<ICard> {
         this._description = container.querySelector(`.${blockName}__text`);
         this._price = container.querySelector(`.${blockName}__price`);
         this._category = container.querySelector(`.${blockName}__category`);
-        this._index = container.querySelector(`.${blockName}__index`);
+        this._index = container.querySelector(`.basket__item-index`);
 
         if (actions?.onClick) {
             if (this._button) {
